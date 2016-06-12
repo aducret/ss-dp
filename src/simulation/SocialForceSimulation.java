@@ -1,5 +1,6 @@
 package simulation;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import main.Main;
@@ -41,7 +42,7 @@ public class SocialForceSimulation {
 			System.out.println("Particles left: " + particles.size());
 			new CellIndexMethodSimulation(simulationData, Main.getOptimalValidM(simulationData), false);
 			moveSystemForward(simulationData, dt);
-			killOutsiders();
+			killOutsiders(simulationData);
 			
 			if (timeToNextFrame < 0) {
 				timeToNextFrame = dt;
@@ -137,8 +138,16 @@ public class SocialForceSimulation {
 		return particle.getRadius() + neighbour.getRadius() - neighbour.getPosition().distanceTo(particle.getPosition());
 }
 	
-	private void killOutsiders() {
-		
+	private void killOutsiders(SimulationData simulationData) {
+		List<Integer> ids = new ArrayList<>();
+		for (Particle particle : simulationData.getParticles()) {
+			if (isOutsider(particle)) {
+				ids.add(particle.getId());
+			}
+		}
+		for (Integer id : ids) {
+			simulationData.removeParticleById(id);
+		}
 	}
 	
 	private Vector2 bottomVerticalWall(Particle particle) {
@@ -239,12 +248,13 @@ public class SocialForceSimulation {
 		return versorN.scale(fN).sum(versorT.scale(fT));
 	}
 	
-	private void lastWall(Particle p) {
+	private boolean isOutsider(Particle p) {
 		double px = p.getPosition().getX();
 		
 		if (px > L + R) {
-			return;
+			return true;
 		}
+		return false;
 	}
 	
 }
